@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "991428897722",
+    "project_id": "gymapp-dbcc3",
+    "storage_bucket": "gymapp-dbcc3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:991428897722:android:bba73aa583a7e2caf90b83",
+        "android_client_info": {
+          "package_name": "com.trainner_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE0Lh5D1xF9YmbkcMXq4-7esjwVD11bDE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
