@@ -8,21 +8,32 @@ class EmptyStateWidget extends StatelessWidget {
     required this.message,
     this.icon = Icons.inbox_outlined,
     this.onRetry,
+    this.primary,
   });
 
   final String message;
   final IconData icon;
   final VoidCallback? onRetry;
+  final Color? primary;
 
   @override
   Widget build(BuildContext context) {
+    final accent = primary ?? Theme.of(context).colorScheme.primary;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppThemeData.spacing * 3),
+        padding: const EdgeInsets.all(AppThemeData.spacing * 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: Colors.grey.shade400),
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 36, color: accent),
+            ),
             const SizedBox(height: AppThemeData.spacing * 2),
             Text(
               message,

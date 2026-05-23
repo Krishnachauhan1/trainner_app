@@ -37,15 +37,16 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
     super.dispose();
   }
 
-  Future<void> _send() async {
+  Future<void> _send([String? text]) async {
     final user = ref.read(authServiceProvider).currentUser;
-    if (user == null || _ctrl.text.trim().isEmpty) return;
+    final body = (text ?? _ctrl.text).trim();
+    if (user == null || body.isEmpty) return;
     await ref.read(chatServiceProvider).sendMessage(
           conversationId: widget.conversationId,
           senderId: user.id,
           senderName: user.name,
           isTrainer: true,
-          content: _ctrl.text.trim(),
+          content: body,
         );
     _ctrl.clear();
   }
@@ -53,54 +54,80 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
   @override
   Widget build(BuildContext context) {
     final chat = ref.watch(chatServiceProvider);
+    final user = ref.watch(authServiceProvider).currentUser;
+
     return Scaffold(
-      appBar: AppBar(title: Text(SeedData.memberName)),
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(SeedData.memberName),
+            const Text('Member', style: TextStyle(fontSize: 12)),
+          ],
+        ),
+      ),
       body: Column(
         children: [
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: () => chat.refreshMessages(widget.conversationId),
-              child: StreamBuilder<List<Message>>(
-                stream: chat.messagesStream(widget.conversationId),
-                builder: (context, snap) {
-                  final messages = snap.data ?? [];
-                  if (messages.isEmpty) {
-                    return ListView(
-                      children: const [
-                        EmptyStateWidget(
-                          message: 'No messages yet. Start the conversation.',
-                        ),
-                      ],
+            child: Container(
+              color: const Color(0xFFEEF1F6),
+              child: RefreshIndicator(
+                onRefresh: () => chat.refreshMessages(widget.conversationId),
+                child: StreamBuilder<List<Message>>(
+                  stream: chat.messagesStream(widget.conversationId),
+                  builder: (context, snap) {
+                    final messages = snap.data ?? [];
+                    if (messages.isEmpty) {
+                      return ListView(
+                        children: const [
+                          EmptyStateWidget(
+                            message: 'Start coaching DK',
+                            icon: Icons.chat_outlined,
+                            primary: AppThemeData.trainerPrimary,
+                          ),
+                        ],
+                      );
+                    }
+                    return StreamBuilder<String?>(
+                      stream: chat.typingStream(widget.conversationId),
+                      builder: (context, typingSnap) {
+                        return ListView.builder(
+                          controller: _scroll,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          itemCount: messages.length +
+                              (typingSnap.data != null ? 1 : 0),
+                          itemBuilder: (_, i) {
+                            if (i == messages.length) {
+                              return const TypingIndicator(
+                                label: 'Member is typing…',
+                              );
+                            }
+                            final m = messages[i];
+                            return ChatBubble(
+                              message: m,
+                              isMemberBubble: !m.isTrainer,
+                            );
+                          },
+                        );
+                      },
                     );
-                  }
-                  return ListView.builder(
-                    controller: _scroll,
-                    itemCount: messages.length,
-                    itemBuilder: (_, i) => ChatBubble(
-                      message: messages[i],
-                      isMemberBubble: !messages[i].isTrainer,
-                    ),
-                  );
-                },
+                  },
+                ),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _ctrl,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Reply…',
+          ChatComposer(
+            controller: _ctrl,
+            primary: AppThemeData.trainerPrimary,
+            hint: 'Reply to member…',
+            onSend: () => _send(),
+            onChanged: user == null
+                ? null
+                : (_) => chat.sendTyping(
+                      widget.conversationId,
+                      user.id,
+                      true,
                     ),
-                  ),
-                ),
-                IconButton(icon: const Icon(Icons.send), onPressed: _send),
-              ],
-            ),
           ),
         ],
       ),

@@ -28,27 +28,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.sports, size: 72, color: AppThemeData.trainerPrimary),
-              const SizedBox(height: 24),
-              Text(
-                'Trainer Console',
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                SeedData.trainerName,
-                style: Theme.of(context).textTheme.titleLarge,
+              const Spacer(),
+              HomeWelcomeHeader(
+                title: 'Trainer Console',
+                subtitle: SeedData.trainerName,
+                primary: AppThemeData.trainerPrimary,
+                icon: Icons.sports_rounded,
               ),
               const SizedBox(height: 32),
+              Text(
+                'Approve calls, chat with members, and review session history.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+              ),
+              const Spacer(),
               if (_loading)
-                const LoadingOverlay()
+                const LoadingOverlay(
+                  color: AppThemeData.trainerPrimary,
+                )
               else
-                FilledButton(
-                  onPressed: _login,
-                  child: const Text('Mock Login'),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _login,
+                    child: const Text('Continue as Trainer'),
+                  ),
                 ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

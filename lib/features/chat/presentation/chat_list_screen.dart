@@ -40,7 +40,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Chats'),
+            const Text('Messages'),
             Text(
               'Member: ${SeedData.memberName}',
               style: Theme.of(context).textTheme.bodySmall,
@@ -49,7 +49,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         ),
       ),
       body: !_ready
-          ? const LoadingOverlay(message: 'Connecting to Firebase…')
+          ? const LoadingOverlay(
+              message: 'Connecting…',
+              color: AppThemeData.trainerPrimary,
+            )
           : Column(
               children: [
                 if (!firebaseOk) const FirestoreOfflineBanner(),
@@ -61,41 +64,17 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                       var list = snap.data ?? [];
                       if (list.isEmpty) list = _memberFallback();
                       return ListView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         itemCount: list.length,
                         itemBuilder: (_, i) {
                           final c = list[i];
-                          return ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: AppThemeData.trainerPrimary,
-                              child: Text(
-                                c.title.isNotEmpty ? c.title[0] : '?',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            title: Text(c.title),
-                            subtitle: Text(
-                              c.lastMessage,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            trailing: c.unreadCount > 0
-                                ? CircleAvatar(
-                                    radius: 10,
-                                    backgroundColor:
-                                        AppThemeData.trainerPrimary,
-                                    child: Text(
-                                      '${c.unreadCount}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                      ),
-                                    ),
-                                  )
-                                : Text(
-                                    AppDateUtils.formatChatTime(
-                                      c.lastMessageAt,
-                                    ),
-                                  ),
+                          return ConversationTile(
+                            title: c.title,
+                            preview: c.lastMessage,
+                            time: c.lastMessageAt,
+                            primary: AppThemeData.trainerPrimary,
+                            unreadCount: c.unreadCount,
+                            highlight: true,
                             onTap: () => context.push('/chat/${c.id}'),
                           );
                         },

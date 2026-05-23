@@ -29,29 +29,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final firebaseOk = ref.watch(firebaseConnectedProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Trainer Home')),
+      appBar: AppBar(title: const Text('Trainer Console')),
       floatingActionButton: const DevPanelFab(),
       body: Column(
         children: [
           if (!firebaseOk) const FirestoreOfflineBanner(),
           Expanded(
-            child: Padding(
+            child: ListView(
               padding: const EdgeInsets.all(16),
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                children: [
-                  _Tile('Members', Icons.people, () => context.push('/members')),
-                  _Tile('Chats', Icons.chat, () => context.push('/chats')),
-                  _Tile('Requests', Icons.inbox, () => context.push('/requests')),
-                  _Tile(
-                    'Sessions',
-                    Icons.history,
-                    () => context.push('/sessions'),
-                  ),
-                ],
-              ),
+              children: [
+                HomeWelcomeHeader(
+                  title: SeedData.trainerName,
+                  subtitle: 'Manage members, chats & calls',
+                  primary: AppThemeData.trainerPrimary,
+                  icon: Icons.sports_martial_arts_rounded,
+                ),
+                const SizedBox(height: 20),
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.05,
+                  children: [
+                    _DashboardTile(
+                      label: 'Members',
+                      icon: Icons.people_rounded,
+                      onTap: () => context.push('/members'),
+                    ),
+                    _DashboardTile(
+                      label: 'Chats',
+                      icon: Icons.chat_rounded,
+                      onTap: () => context.push('/chats'),
+                    ),
+                    _DashboardTile(
+                      label: 'Requests',
+                      icon: Icons.inbox_rounded,
+                      onTap: () => context.push('/requests'),
+                    ),
+                    _DashboardTile(
+                      label: 'Sessions',
+                      icon: Icons.history_rounded,
+                      onTap: () => context.push('/sessions'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -60,8 +84,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _Tile extends StatelessWidget {
-  const _Tile(this.label, this.icon, this.onTap);
+class _DashboardTile extends StatelessWidget {
+  const _DashboardTile({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
 
   final String label;
   final IconData icon;
@@ -70,16 +98,36 @@ class _Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 36, color: AppThemeData.trainerPrimary),
-            const SizedBox(height: 8),
-            Text(label, style: Theme.of(context).textTheme.titleLarge),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppThemeData.trainerPrimary,
+                      AppThemeData.trainerPrimary.withValues(alpha: 0.7),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: Colors.white, size: 26),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
